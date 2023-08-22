@@ -1,26 +1,54 @@
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
+import { useEffect, useState } from "react";
+import Navbar from "./components/Navbar";
+import Searchfilter from "./components/Searchfilter";
+import axios from "axios";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import CountryDetail from "./components/CountryDetail";
+import CountryCard from "./components/CountryCard";
 
 function App() {
+  const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [toggle, setToggle] = useState(false);
+
+  console.log(data);
+
+  const handleDarkMode = () => {
+    setToggle((prev) => !prev);
+  };
+
+  const getCountries = async () => {
+    try {
+      const response = await axios.get("https://restcountries.com/v3.1/all");
+      setData(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getCountries();
+  }, []);
+
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <BrowserRouter>
+      <div className={`${toggle ? "bg-slate-800 h-screen" : ""}`}>
+        <Navbar setToggle={handleDarkMode} toggle={toggle} />
+
+        <Routes>
+          <Route
+            path="/country/:countryId"
+            element={<CountryDetail data={data} toggle={toggle} />}
+          />
+          <Route
+            path="/"
+            element={
+              <CountryCard setData={setData} data={data} toggle={toggle} />
+            }
+          />
+        </Routes>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card" style={{ fontSize: "28px" }}>
-        <p>Enjoy building this project</p>
-      </div>
-      <p style={{ fontSize: "24px" }} className="read-the-docs">
-        Countries API project
-      </p>
-    </>
+    </BrowserRouter>
   );
 }
 
